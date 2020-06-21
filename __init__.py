@@ -35,6 +35,7 @@ class BlindControl(MycroftSkill):
         location = message.data.get('location')
         number = message.data.get('number')
         self.log.info(f'Location: {location}, Number: {number}')
+        print(f'Location: {location}, Number: {number}')
         self.blind_controller.set_blind_state(location,number)
         self.speak(f"Moving blind to {number}")
 
