@@ -20,24 +20,24 @@ class BlindControl(MycroftSkill):
 
     @intent_handler(IntentBuilder('Open').require('Blind').require('Open').require('Location'))
     def handle_open_blind(self, message):
+        self.speak(f"Opening {location} blind")
         location = message.data.get('Location')
         self.blind_controller.set_blind_state(location,0)
-        self.speak(f"Opening {location} blind")
 
     @intent_handler(IntentBuilder('Close').require('Blind').require('Close').require('Location'))
     def handle_close_blind(self, message):
+        self.speak(f"Closing {location} blind")
         location = message.data.get('Location')
         self.blind_controller.set_blind_state(location,10)
-        self.speak(f"Closing {location} blind")
 
     @intent_handler('set.blind.intent')
     def handle_set_blind(self, message):
         location = message.data.get('location')
         number = message.data.get('number')
+        self.speak(f"Moving blind to {number}")
         self.log.info(f'Location: {location}, Number: {number}')
         print(f'Location: {location}, Number: {number}')
         self.blind_controller.set_blind_state(location,number)
-        self.speak(f"Moving blind to {number}")
 
 
 def create_skill():
