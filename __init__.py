@@ -1,13 +1,42 @@
-from mycroft import MycroftSkill, intent_file_handler
+from adapt.intent import IntentBuilder
+from mycroft import MycroftSkill, intent_handler
+from blind_control import BlindController
 
 
 class BlindControl(MycroftSkill):
     def __init__(self):
         MycroftSkill.__init__(self)
 
-    @intent_file_handler('control.blind.intent')
-    def handle_control_blind(self, message):
-        self.speak_dialog('control.blind')
+    def initialize(self):
+        self.settings_change_callback = self.on_settings_changed
+        self.on_settings_changed()
+
+    def on_settings_changed(self):
+        ha_host = self.settings.get('ha_host')
+        ha_port = self.settings.get('ha_port')
+        api_key = self.settings.get('api_key')
+        self.blind_controller = BlindController(ha_host,ha_port,api_key)
+        self.register_intent_file('set.blind.intent', self.handle_set_blind)
+
+    @intent_handler(IntentBuilder('Open').require('Blind').require('Open').require('Location'))
+    def handle_open_blind(self, message):
+        location = message.data.get('Location')
+        self.blind_controller.set_blind_state(location,0)
+        self.speak(f"Opening {location} blind")
+
+    @intent_handler(IntentBuilder('Close').require('Blind').require('Close').require('Location'))
+    def handle_close_blind(self, message):
+        location = message.data.get('Location')
+        self.blind_controller.set_blind_state(location,10)
+        self.speak(f"Closing {location} blind")
+
+    @intent_handler('set.blind.intent')
+    def handle_set_blind(self, message):
+        location = message.data.get('location')
+        number = message.data.get('number')
+        self.log.info(f'Location: {location}, Number: {number}')
+        self.blind_controller.set_blind_state(location,number)
+        self.speak(f"Moving blind to {number}")
 
 
 def create_skill():
